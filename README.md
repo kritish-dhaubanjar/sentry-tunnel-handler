@@ -1,5 +1,5 @@
 # sentry-tunnel-handler
-![sentry-tunnel-handler](https://github.com/Vyaguta/sentry-tunnel-handler/assets/25634165/8b9c9cee-325c-4900-8952-a2416f11fa2b)
+![image](https://github.com/kritish-dhaubanjar/sentry-tunnel/assets/25634165/b421c741-3088-409a-b607-83b54f17137a)
 
 # Docker
 **a. Build Docker Image**
