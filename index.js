@@ -1,8 +1,6 @@
 const http = require('http');
 const { URL } = require('url');
-
-const SENTRY_HOST = "o******.ingest.us.sentry.io";
-const SENTRY_PROJECT_IDS = ["****************"];
+const { HOST, PORT, SENTRY_HOST, SENTRY_PROJECT_IDS } = require('./env');
 
 const server = http.createServer(async (request, response) => {
   response.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,13 +10,16 @@ const server = http.createServer(async (request, response) => {
   if (request.method === 'OPTIONS') {
     response.writeHead(204);
     response.end();
+
     return;
   }
 
   if (request.method === 'POST' && request.url === '/') {
-    let envelope = '';
+    let envelope = Buffer.from('');
 
-    request.on('data', chunk => envelope += chunk);
+    request.on('data', chunk => {
+      envelope = Buffer.concat([envelope, chunk]);
+    })
 
     request.on('end', async () => {
       try {
@@ -36,9 +37,9 @@ const server = http.createServer(async (request, response) => {
           throw new Error(`Invalid sentry project id: ${projectId}`);
         }
 
-        const upstreamSentryUrl = `https://${SENTRY_HOST}/api/${projectId}/envelope/`;
+        const upstreamSentryURL = `https://${SENTRY_HOST}/api/${projectId}/envelope/`;
 
-        await fetch(upstreamSentryUrl, { method: "POST", body: envelope });
+        await fetch(upstreamSentryURL, { method: "POST", body: envelope });
 
         response.writeHead(200, { 'Content-Type': 'application/json' });
         response.end(JSON.stringify({}));
@@ -54,6 +55,6 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
-server.listen(3003, () => {
-  console.log('Server is listening on port 3003');
+server.listen(PORT, HOST, () => {
+  console.log(`sentry-tunnel-handler listening on http://${HOST}:${PORT}`)
 });
